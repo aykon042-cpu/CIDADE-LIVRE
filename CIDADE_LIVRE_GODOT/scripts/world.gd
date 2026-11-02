@@ -248,7 +248,7 @@ func _process(delta: float) -> void:
 	if police_officer != null:
 		police_officer.wanted_level = wanted_level
 	if player != null and health_bar != null:
-		health_bar.value = player.health
+		health_bar.value = float(player.get("health"))
 	if mission_marker != null:
 		mission_marker.rotate_y(delta * 0.8)
 	if mission_manager != null:

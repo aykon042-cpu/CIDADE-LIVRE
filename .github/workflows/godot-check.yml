@@ -1,0 +1,28 @@
+name: Godot project validation
+
+on:
+  push:
+    paths:
+      - "CIDADE_LIVRE_GODOT/**"
+      - ".github/workflows/godot-check.yml"
+  pull_request:
+    paths:
+      - "CIDADE_LIVRE_GODOT/**"
+      - ".github/workflows/godot-check.yml"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v1
+        with:
+          version: 4.3.0
+          use-dotnet: false
+      - name: Import and parse project
+        run: godot --headless --editor --path CIDADE_LIVRE_GODOT --quit
+      - name: Run project startup smoke test
+        run: timeout 30s godot --headless --path CIDADE_LIVRE_GODOT --quit-after 5

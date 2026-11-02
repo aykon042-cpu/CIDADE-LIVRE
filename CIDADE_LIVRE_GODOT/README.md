@@ -29,3 +29,8 @@ This is an early playable foundation, not a GTA IV equivalent. Vehicle entry/exi
 - Farmácia Central, Mercado Popular e Clínica Vida com interiores acessíveis.
 - Use **E** perto de uma loja para entrar e novamente para comprar recuperação de saúde. Cada estabelecimento tem preço e recuperação diferentes; o saldo é validado antes da compra.
 - A base continua sendo um protótipo Godot: a validação automatizada não substitui testes de gameplay em Android.
+
+
+## Trânsito com semáforos
+- A avenida agora tem três semáforos 3D com ciclo automático de verde, amarelo e vermelho.
+- Os carros de tráfego associados à faixa reduzem e param antes do cruzamento durante o vermelho; a rota por waypoints continua ativa.

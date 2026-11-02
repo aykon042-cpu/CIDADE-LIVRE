@@ -10,6 +10,7 @@ const SAVE_MANAGER_SCRIPT = preload("res://scripts/save_manager.gd")
 const TRAFFIC_SCRIPT = preload("res://scripts/traffic_vehicle.gd")
 const HOUSE_SCRIPT = preload("res://scripts/residential_house.gd")
 const SHOP_SCRIPT = preload("res://scripts/shop.gd")
+const TRAFFIC_SIGNAL_SCRIPT = preload("res://scripts/traffic_signal.gd")
 var player: CharacterBody3D
 var wanted_level := 0
 var money := 250
@@ -30,6 +31,7 @@ var mission_marker: MeshInstance3D
 var marker_material: StandardMaterial3D
 var houses: Array[Node3D] = []
 var shops: Array[Node3D] = []
+var traffic_signals: Array[Node3D] = []
 
 func _ready() -> void:
 	_build_environment()
@@ -38,6 +40,7 @@ func _ready() -> void:
 	_build_hud()
 	_spawn_population()
 	_spawn_vehicle()
+	_spawn_traffic_signals()
 	_spawn_traffic()
 	_spawn_police()
 	_setup_game_systems()
@@ -184,6 +187,8 @@ func _spawn_traffic() -> void:
 		traffic.position = Vector3(lane_x, 1.0, randf_range(-55.0, 55.0))
 		traffic.waypoints = [Vector3(lane_x, 0.0, -82.0), Vector3(lane_x, 0.0, 82.0)]
 		traffic.traffic_color = Color(randf_range(0.12, 0.8), randf_range(0.12, 0.8), randf_range(0.12, 0.8))
+		if not traffic_signals.is_empty():
+			traffic.traffic_signal = traffic_signals[traffic_cars.size() % traffic_signals.size()]
 		for wheel_pos in [Vector3(-0.8, 0.25, -1.1), Vector3(0.8, 0.25, -1.1), Vector3(-0.8, 0.25, 1.1), Vector3(0.8, 0.25, 1.1)]:
 			var wheel := VehicleWheel3D.new()
 			wheel.position = wheel_pos
@@ -194,6 +199,15 @@ func _spawn_traffic() -> void:
 			traffic.add_child(wheel)
 		add_child(traffic)
 		traffic_cars.append(traffic)
+
+func _spawn_traffic_signals() -> void:
+	for lane_x in [-20.0, 20.0, 40.0]:
+		var signal_node := Node3D.new()
+		signal_node.set_script(TRAFFIC_SIGNAL_SCRIPT)
+		signal_node.name = "TrafficSignal_%d" % traffic_signals.size()
+		signal_node.position = Vector3(lane_x + 3.0, 0.0, 0.0)
+		add_child(signal_node)
+		traffic_signals.append(signal_node)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_action_pressed("interact"):

@@ -41,3 +41,12 @@ This is still not a photorealistic GTA-style production: the player and vehicles
 ## Pedestres com rotas
 - Doze pedestres circulam por três trajetos ao redor da área central, fazem pausas e retomam seus percursos.
 - Ao se aproximar, o jogador assusta os pedestres; eles fogem e depois voltam para o trecho mais próximo da rota.
+
+## Jogabilidade — atualização de movimentação e direção
+- Movimento a pé relativo à câmera, aceleração e desaceleração mais suaves, controle aéreo e corrida com barra de resistência que se recupera.
+- Câmera de terceira pessoa com sensibilidade ajustada para mouse e arrasto na tela.
+- Direção com aceleração, esterçamento progressivo, freio de mão e câmera de perseguição que afasta conforme a velocidade.
+- Ao entrar no veículo, a colisão do personagem é desativada; ao sair, é reativada para evitar que o jogador fique preso no carro.
+- Os controles existentes de teclado e toque continuam usando as mesmas ações.
+
+Ainda é uma base de jogabilidade em evolução: não inclui combate completo, sistema de cobertura, animações finais, troca de personagens ou física de veículos de produção.

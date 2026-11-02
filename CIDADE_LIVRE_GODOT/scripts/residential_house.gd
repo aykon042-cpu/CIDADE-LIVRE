@@ -8,6 +8,8 @@ var occupied := false
 func _ready() -> void:
 	_build_exterior()
 	_build_interior()
+	# Hidden geometry must not block the player on the opposite side of the door.
+	_set_collision_enabled(interior_root, false)
 
 func _build_exterior() -> void:
 	exterior_root = Node3D.new()
@@ -80,10 +82,18 @@ func _box(parent: Node3D, pos: Vector3, size: Vector3, color: Color, solid: bool
 		body.add_child(collision)
 	parent.add_child(body)
 
+func _set_collision_enabled(root: Node, enabled: bool) -> void:
+	for child in root.get_children():
+		if child is CollisionShape3D:
+			child.set_deferred("disabled", not enabled)
+		_set_collision_enabled(child, enabled)
+
 func interact(actor: Node3D) -> void:
 	if actor == null:
 		return
 	occupied = not occupied
 	exterior_root.visible = not occupied
 	interior_root.visible = occupied
+	_set_collision_enabled(exterior_root, not occupied)
+	_set_collision_enabled(interior_root, occupied)
 	actor.global_position = global_position + (Vector3(0, 1.0, 1.7) if occupied else Vector3(0, 1.0, 5.2))

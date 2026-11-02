@@ -47,3 +47,10 @@ Cada sistema precisa ser integrado à cena, executado no Godot e testado antes d
 - Ciclo temporizado: verde, amarelo e vermelho, com duração configurável por instância.
 - Veículos de tráfego recebem uma referência ao semáforo da sua faixa e freiam quando chegam à zona de parada durante o vermelho.
 - O sistema preserva os waypoints e a condução existentes; ainda requer teste visual e físico no Godot/Android para ajustar distâncias e frenagem.
+
+
+## Marco de população — rotas de pedestres
+- Doze civis distribuídos em três circuitos de caminhada ao redor da área central, em vez de destinos totalmente aleatórios.
+- Cada civil percorre pontos de rota em sequência, faz pequenas pausas e retoma o circuito.
+- Ao perceber o jogador próximo, o pedestre foge temporariamente; depois retorna ao ponto mais próximo de sua rota.
+- Mantidos gravidade, colisão e movimento via CharacterBody3D; ainda é necessário observar cruzamentos e evitar obstáculos no teste de gameplay.

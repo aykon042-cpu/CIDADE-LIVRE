@@ -33,9 +33,11 @@ func _build_body() -> void:
 	mesh.material_override = material
 	add_child(mesh)
 	camera_pivot = Node3D.new()
+	camera_pivot.name = "CameraPivot"
 	camera_pivot.position.y = 1.55
 	add_child(camera_pivot)
 	camera = Camera3D.new()
+	camera.name = "Camera3D"
 	camera.position = Vector3(0, 1.1, 5.5)
 	camera.rotation.x = deg_to_rad(-12)
 	camera.current = true

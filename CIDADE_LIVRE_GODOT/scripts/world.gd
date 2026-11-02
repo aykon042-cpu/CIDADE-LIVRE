@@ -7,6 +7,7 @@ const VEHICLE_SCRIPT = preload("res://scripts/vehicle.gd")
 const MOBILE_CONTROLS_SCRIPT = preload("res://scripts/mobile_controls.gd")
 const MISSION_MANAGER_SCRIPT = preload("res://scripts/mission_manager.gd")
 const SAVE_MANAGER_SCRIPT = preload("res://scripts/save_manager.gd")
+const TRAFFIC_SCRIPT = preload("res://scripts/traffic_vehicle.gd")
 var player: CharacterBody3D
 var wanted_level := 0
 var money := 250
@@ -18,6 +19,9 @@ var mobile_controls: CanvasLayer
 var save_timer := 0.0
 var starter_vehicle: VehicleBody3D
 var current_vehicle: VehicleBody3D
+var traffic_cars: Array[VehicleBody3D] = []
+var sun_light: DirectionalLight3D
+var day_clock := 0.25
 
 func _ready() -> void:
 	_build_environment()
@@ -26,6 +30,7 @@ func _ready() -> void:
 	_build_hud()
 	_spawn_population()
 	_spawn_vehicle()
+	_spawn_traffic()
 	_spawn_police()
 	_setup_game_systems()
 	_update_hud()
@@ -39,7 +44,8 @@ func _build_environment() -> void:
 	env.ambient_light_energy = 0.7
 	world_env.environment = env
 	add_child(world_env)
-	var sun := DirectionalLight3D.new()
+	sun_light = DirectionalLight3D.new()
+	var sun := sun_light
 	sun.rotation_degrees = Vector3(-48, -30, 0)
 	sun.light_energy = 1.1
 	add_child(sun)
@@ -109,6 +115,7 @@ func _spawn_population() -> void:
 		npc.set_script(CIVILIAN_SCRIPT)
 		npc.position = Vector3(randf_range(-14, 14), 1, randf_range(-14, 14))
 		npc.name = "Civilian_%02d" % i
+		npc.player_target = player
 		add_child(npc)
 
 func _spawn_vehicle() -> void:
@@ -126,6 +133,24 @@ func _spawn_vehicle() -> void:
 		car.add_child(wheel)
 	add_child(car)
 	starter_vehicle = car
+
+func _spawn_traffic() -> void:
+	for lane_x in [-20.0, 20.0, 40.0]:
+		var traffic := VehicleBody3D.new()
+		traffic.set_script(TRAFFIC_SCRIPT)
+		traffic.position = Vector3(lane_x, 1.0, randf_range(-55.0, 55.0))
+		traffic.waypoints = [Vector3(lane_x, 0.0, -82.0), Vector3(lane_x, 0.0, 82.0)]
+		traffic.traffic_color = Color(randf_range(0.12, 0.8), randf_range(0.12, 0.8), randf_range(0.12, 0.8))
+		for wheel_pos in [Vector3(-0.8, 0.25, -1.1), Vector3(0.8, 0.25, -1.1), Vector3(-0.8, 0.25, 1.1), Vector3(0.8, 0.25, 1.1)]:
+			var wheel := VehicleWheel3D.new()
+			wheel.position = wheel_pos
+			wheel.wheel_radius = 0.35
+			wheel.wheel_rest_length = 0.2
+			wheel.use_as_steering = wheel_pos.z < 0.0
+			wheel.use_as_traction = true
+			traffic.add_child(wheel)
+		add_child(traffic)
+		traffic_cars.append(traffic)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_action_pressed("interact"):
@@ -201,6 +226,10 @@ func _save_progress() -> void:
 	SAVE_MANAGER_SCRIPT.save_game(player, money, wanted_level, mission_id)
 
 func _process(delta: float) -> void:
+	day_clock = fposmod(day_clock + delta / 900.0, 1.0)
+	if sun_light != null:
+		sun_light.rotation_degrees.x = lerpf(-15.0, -165.0, day_clock)
+		sun_light.light_energy = lerpf(0.25, 1.1, clampf(sin(day_clock * PI), 0.0, 1.0))
 	if player != null and mission_manager != null:
 		mission_manager.update_player_position(player.global_position)
 	save_timer += delta

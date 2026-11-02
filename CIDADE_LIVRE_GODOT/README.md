@@ -34,3 +34,8 @@ This is an early playable foundation, not a GTA IV equivalent. Vehicle entry/exi
 ## Trânsito com semáforos
 - A avenida agora tem três semáforos 3D com ciclo automático de verde, amarelo e vermelho.
 - Os carros de tráfego associados à faixa reduzem e param antes do cruzamento durante o vermelho; a rota por waypoints continua ativa.
+
+
+## Pedestres com rotas
+- Doze pedestres circulam por três trajetos ao redor da área central, fazem pausas e retomam seus percursos.
+- Ao se aproximar, o jogador assusta os pedestres; eles fogem e depois voltam para o trecho mais próximo da rota.

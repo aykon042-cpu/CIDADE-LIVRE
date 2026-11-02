@@ -70,6 +70,7 @@ func _physics_process(delta: float) -> void:
 		_move_to_destination(1.35)
 	else:
 		_move_to_destination()
+	move_and_slide()
 
 func _move_to_destination(speed_scale: float = 1.0) -> void:
 	var direction := destination - global_position
@@ -83,7 +84,6 @@ func _move_to_destination(speed_scale: float = 1.0) -> void:
 		velocity.x = travel.x * move_speed * speed_scale
 		velocity.z = travel.z * move_speed * speed_scale
 		look_at(Vector3(destination.x, global_position.y, destination.z))
-	move_and_slide()
 
 func _advance_route() -> void:
 	if route_points.is_empty():

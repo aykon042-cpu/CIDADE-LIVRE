@@ -18,7 +18,12 @@ func _build_exterior() -> void:
 	exterior_root = Node3D.new()
 	exterior_root.name = "Exterior"
 	add_child(exterior_root)
-	_box(exterior_root, Vector3(0, 2.1, 0), Vector3(7.5, 4.2, 6.5), Color(0.72, 0.7, 0.62), true, "StoreShell")
+	_box(exterior_root, Vector3(0, 2.1, -3.12), Vector3(7.5, 4.2, 0.16), Color(0.72, 0.7, 0.62), true, "BackWall")
+	_box(exterior_root, Vector3(-3.67, 2.1, 0), Vector3(0.16, 4.2, 6.2), Color(0.72, 0.7, 0.62), true, "LeftWall")
+	_box(exterior_root, Vector3(3.67, 2.1, 0), Vector3(0.16, 4.2, 6.2), Color(0.72, 0.7, 0.62), true, "RightWall")
+	_box(exterior_root, Vector3(-2.35, 2.1, 3.12), Vector3(2.8, 4.2, 0.16), Color(0.72, 0.7, 0.62), true, "FrontLeft")
+	_box(exterior_root, Vector3(2.35, 2.1, 3.12), Vector3(2.8, 4.2, 0.16), Color(0.72, 0.7, 0.62), true, "FrontRight")
+	_box(exterior_root, Vector3(0, 3.9, 3.12), Vector3(2.0, 0.6, 0.16), Color(0.72, 0.7, 0.62), true, "DoorHeader")
 	_box(exterior_root, Vector3(0, 1.45, 3.28), Vector3(2.3, 2.8, 0.16), accent_color, false, "Shopfront")
 	_box(exterior_root, Vector3(0, 3.55, 3.34), Vector3(5.5, 0.65, 0.2), accent_color.darkened(0.25), false, "Sign")
 	_box(exterior_root, Vector3(0, 0.12, 0), Vector3(7.8, 0.24, 6.8), Color(0.3, 0.3, 0.3), false, "Foundation")

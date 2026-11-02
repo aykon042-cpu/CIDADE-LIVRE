@@ -156,10 +156,18 @@ func _spawn_player() -> void:
 	add_child(player)
 
 func _spawn_population() -> void:
+	var pedestrian_routes: Array[Array] = [
+		[Vector3(-11.0, 0.0, -11.0), Vector3(11.0, 0.0, -11.0), Vector3(11.0, 0.0, 11.0), Vector3(-11.0, 0.0, 11.0)],
+		[Vector3(-16.0, 0.0, -7.0), Vector3(-16.0, 0.0, 7.0), Vector3(-7.0, 0.0, 16.0), Vector3(7.0, 0.0, 16.0)],
+		[Vector3(16.0, 0.0, 7.0), Vector3(16.0, 0.0, -7.0), Vector3(7.0, 0.0, -16.0), Vector3(-7.0, 0.0, -16.0)]
+	]
 	for i in range(12):
 		var npc := CharacterBody3D.new()
 		npc.set_script(CIVILIAN_SCRIPT)
-		npc.position = Vector3(randf_range(-14, 14), 1, randf_range(-14, 14))
+		var route: Array = pedestrian_routes[i % pedestrian_routes.size()]
+		npc.set("route_points", route)
+		npc.set("route_index", int(i / pedestrian_routes.size()) % route.size())
+		npc.position = route[int(i / pedestrian_routes.size()) % route.size()] + Vector3(0.0, 1.0, 0.0)
 		npc.name = "Civilian_%02d" % i
 		npc.player_target = player
 		add_child(npc)

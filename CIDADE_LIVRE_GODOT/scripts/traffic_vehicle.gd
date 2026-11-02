@@ -7,14 +7,34 @@ class_name CityTrafficVehicle
 var waypoints: Array[Vector3] = []
 var waypoint_index := 0
 var stopped := false
+var traffic_color := Color(0.18, 0.32, 0.62)
 
 func _ready() -> void:
+	mass = 1050.0
+	_build_vehicle_body()
 	if waypoints.is_empty():
 		waypoints = [global_position + Vector3(0, 0, -80), global_position + Vector3(80, 0, -80), global_position + Vector3(80, 0, 0), global_position]
 	for wheel in get_children():
 		if wheel is VehicleWheel3D:
 			wheel.use_as_traction = true
 			wheel.wheel_friction_slip = 2.0
+
+func _build_vehicle_body() -> void:
+	var collision := CollisionShape3D.new()
+	var body_shape := BoxShape3D.new()
+	body_shape.size = Vector3(1.8, 0.8, 3.6)
+	collision.shape = body_shape
+	collision.position.y = 0.65
+	add_child(collision)
+	var visual := MeshInstance3D.new()
+	var body_mesh := BoxMesh.new()
+	body_mesh.size = Vector3(1.8, 0.8, 3.6)
+	visual.mesh = body_mesh
+	visual.position.y = 0.65
+	var material := StandardMaterial3D.new()
+	material.albedo_color = traffic_color
+	visual.material_override = material
+	add_child(visual)
 
 func _physics_process(_delta: float) -> void:
 	if stopped or waypoints.is_empty():

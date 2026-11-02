@@ -8,6 +8,7 @@ var target: Node3D
 var wanted_level := 0
 var last_known_position := Vector3.ZERO
 var search_time := 0.0
+var has_last_known_position := false
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 func _ready() -> void:
@@ -31,12 +32,17 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if wanted_level <= 0 or target == null or not is_instance_valid(target):
+		if wanted_level <= 0:
+			has_last_known_position = false
 		velocity.x = move_toward(velocity.x, 0.0, move_speed * delta)
 		velocity.z = move_toward(velocity.z, 0.0, move_speed * delta)
 		if not is_on_floor():
 			velocity.y -= gravity * delta
 		move_and_slide()
 		return
+	if not has_last_known_position:
+		last_known_position = target.global_position
+		has_last_known_position = true
 	var distance := global_position.distance_to(target.global_position)
 	if distance <= detection_radius:
 		last_known_position = target.global_position

@@ -9,6 +9,7 @@ const MISSION_MANAGER_SCRIPT = preload("res://scripts/mission_manager.gd")
 const SAVE_MANAGER_SCRIPT = preload("res://scripts/save_manager.gd")
 const TRAFFIC_SCRIPT = preload("res://scripts/traffic_vehicle.gd")
 const HOUSE_SCRIPT = preload("res://scripts/residential_house.gd")
+const SHOP_SCRIPT = preload("res://scripts/shop.gd")
 var player: CharacterBody3D
 var wanted_level := 0
 var money := 250
@@ -28,6 +29,7 @@ var health_bar: ProgressBar
 var mission_marker: MeshInstance3D
 var marker_material: StandardMaterial3D
 var houses: Array[Node3D] = []
+var shops: Array[Node3D] = []
 
 func _ready() -> void:
 	_build_environment()
@@ -82,7 +84,7 @@ func _build_city() -> void:
 		for z in range(-4, 5):
 			if abs(x) < 2 and abs(z) < 2:
 				continue
-			if Vector2i(x, z) in [Vector2i(-2, -2), Vector2i(-2, 2), Vector2i(2, -2), Vector2i(2, 2), Vector2i(-3, 0), Vector2i(3, 0)]:
+			if Vector2i(x, z) in [Vector2i(-2, -2), Vector2i(-2, 2), Vector2i(2, -2), Vector2i(2, 2), Vector2i(-3, 0), Vector2i(3, 0), Vector2i(0, -3), Vector2i(0, 3), Vector2i(-3, -2)]:
 				continue
 			var h := randf_range(7.0, 24.0)
 			var w := randf_range(7.0, 12.0)
@@ -91,6 +93,7 @@ func _build_city() -> void:
 			_add_box(pos, Vector3(w, h, d), Color(randf_range(0.25, 0.65), randf_range(0.25, 0.65), randf_range(0.28, 0.7)), "Building")
 	_add_box(Vector3(0, 0.08, 0), Vector3(18, 0.12, 18), Color(0.15, 0.38, 0.18), "CentralPark")
 	_spawn_houses()
+	_spawn_shops()
 
 func _spawn_houses() -> void:
 	for cell in [Vector2i(-2, -2), Vector2i(-2, 2), Vector2i(2, -2), Vector2i(2, 2), Vector2i(-3, 0), Vector2i(3, 0)]:
@@ -103,6 +106,25 @@ func _spawn_houses() -> void:
 		house.position = Vector3(cell.x * 20.0 + 10.0, 0.0, cell.y * 20.0 + 10.0)
 		add_child(house)
 		houses.append(house)
+
+func _spawn_shops() -> void:
+	var definitions := [
+		{"cell": Vector2i(0, -3), "name": "Farmácia Central", "price": 75, "heal": 55.0, "color": Color(0.2, 0.65, 0.42)},
+		{"cell": Vector2i(0, 3), "name": "Mercado Popular", "price": 35, "heal": 25.0, "color": Color(0.85, 0.58, 0.16)},
+		{"cell": Vector2i(-3, -2), "name": "Clínica Vida", "price": 110, "heal": 85.0, "color": Color(0.25, 0.48, 0.82)}
+	]
+	for definition in definitions:
+		var shop := Node3D.new()
+		shop.set_script(SHOP_SCRIPT)
+		shop.name = str(definition.name).replace(" ", "")
+		shop.set("shop_name", definition.name)
+		shop.set("service_price", definition.price)
+		shop.set("service_amount", definition.heal)
+		shop.set("accent_color", definition.color)
+		var cell: Vector2i = definition.cell
+		shop.position = Vector3(cell.x * 20.0 + 10.0, 0.0, cell.y * 20.0 + 10.0)
+		add_child(shop)
+		shops.append(shop)
 
 func _add_box(pos: Vector3, size: Vector3, color: Color, node_name: String) -> void:
 	var body := StaticBody3D.new()
@@ -197,6 +219,21 @@ func _unhandled_input(event: InputEvent) -> void:
 			nearest_house = house
 	if nearest_house != null and nearest_house.has_method("interact"):
 		nearest_house.interact(player)
+		return
+	var nearest_shop: Node3D
+	nearest_distance = 4.5
+	for shop in shops:
+		if not is_instance_valid(shop):
+			continue
+		var distance := player.global_position.distance_to(shop.global_position)
+		if distance <= nearest_distance:
+			nearest_distance = distance
+			nearest_shop = shop
+	if nearest_shop != null and nearest_shop.has_method("interact"):
+		var message: String = nearest_shop.interact(player, self)
+		if not message.is_empty():
+			mission_label.text = message
+			_update_hud()
 
 func _spawn_police() -> void:
 	var officer := CharacterBody3D.new()
@@ -228,7 +265,7 @@ func _build_hud() -> void:
 	mission_label.text = "MISSÃO: Explore a cidade e encontre o marcador."
 	column.add_child(mission_label)
 	var help := Label.new()
-	help.text = "WASD: mover | Shift: correr | Espaço: pular | E: entrar/sair do carro"
+	help.text = "WASD: mover | Shift: correr | Espaço: pular | E: interagir / comprar"
 	column.add_child(help)
 
 func _setup_game_systems() -> void:

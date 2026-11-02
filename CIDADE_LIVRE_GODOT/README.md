@@ -23,3 +23,9 @@ This is an early playable foundation, not a GTA IV equivalent. Vehicle entry/exi
 - Mouse: camera (desktop)
 - Drag on the upper/right screen area: camera (Android)
 - Touch buttons: move, run, jump and interact (Android)
+
+
+## Distrito comercial (novo)
+- Farmácia Central, Mercado Popular e Clínica Vida com interiores acessíveis.
+- Use **E** perto de uma loja para entrar e novamente para comprar recuperação de saúde. Cada estabelecimento tem preço e recuperação diferentes; o saldo é validado antes da compra.
+- A base continua sendo um protótipo Godot: a validação automatizada não substitui testes de gameplay em Android.

@@ -5,6 +5,8 @@ class_name CityCivilian
 @export var wander_radius := 12.0
 var home_position: Vector3
 var destination: Vector3
+var player_target: Node3D
+var flee_radius := 7.0
 var wait_time := 0.0
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
@@ -30,6 +32,14 @@ func _ready() -> void:
 	add_child(visual)
 
 func _physics_process(delta: float) -> void:
+	velocity.x = move_toward(velocity.x, 0.0, move_speed * 2.0 * delta)
+	velocity.z = move_toward(velocity.z, 0.0, move_speed * 2.0 * delta)
+	if player_target != null and is_instance_valid(player_target) and global_position.distance_to(player_target.global_position) < flee_radius:
+		var escape := global_position - player_target.global_position
+		escape.y = 0.0
+		if escape.length_squared() > 0.01:
+			destination = global_position + escape.normalized() * 12.0
+			wait_time = 0.0
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 	if wait_time > 0.0:

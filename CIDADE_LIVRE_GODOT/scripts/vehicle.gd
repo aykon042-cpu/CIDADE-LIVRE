@@ -1,25 +1,29 @@
 extends VehicleBody3D
 class_name CityVehicle
 
-@export var engine_power := 110.0
-@export var steering_limit := 0.45
-@export var brake_force := 25.0
+@export var engine_power := 180.0
+@export var steering_limit := 0.48
+@export var brake_force := 32.0
+@export var handbrake_force := 65.0
 var driver: Node3D
 var vehicle_camera: Camera3D
+var camera_target := Vector3(0, 3.0, 8.0)
 
 func _ready() -> void:
-	mass = 1200.0
+	mass = 1250.0
 	_build_placeholder_body()
 	vehicle_camera = Camera3D.new()
 	vehicle_camera.name = "VehicleCamera"
-	vehicle_camera.position = Vector3(0, 2.8, 7.0)
-	vehicle_camera.rotation_degrees.x = -12.0
+	vehicle_camera.position = camera_target
+	vehicle_camera.rotation_degrees.x = -13.0
 	vehicle_camera.current = false
+	vehicle_camera.fov = 82.0
 	add_child(vehicle_camera)
 	for child in get_children():
 		if child is VehicleWheel3D:
 			child.use_as_traction = true
-			child.wheel_friction_slip = 2.5
+			child.wheel_friction_slip = 3.2
+			child.suspension_stiffness = 28.0
 
 func _build_placeholder_body() -> void:
 	if get_node_or_null("CollisionShape3D") == null:
@@ -41,30 +45,42 @@ func _build_placeholder_body() -> void:
 		visual.name = "Visual"
 		add_child(visual)
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if driver == null:
 		engine_force = 0.0
-		brake = 2.0
+		brake = 3.0
 		return
 	var throttle := Input.get_action_strength("move_forward") - Input.get_action_strength("move_back")
 	var steer := Input.get_action_strength("move_left") - Input.get_action_strength("move_right")
+	var speed_ratio := clampf(linear_velocity.length() / 24.0, 0.25, 1.0)
 	engine_force = throttle * engine_power
-	steering = clampf(steer * steering_limit, -steering_limit, steering_limit)
-	brake = brake_force if Input.is_action_pressed("sprint") else 0.0
+	steering = move_toward(steering, steer * steering_limit * speed_ratio, delta * 2.8)
+	brake = handbrake_force if Input.is_action_pressed("sprint") else (brake_force if absf(throttle) < 0.05 else 0.0)
+	var desired_camera := Vector3(0, 2.8, 7.5 + linear_velocity.length() * 0.035)
+	vehicle_camera.position = vehicle_camera.position.lerp(desired_camera, minf(1.0, delta * 3.0))
+	vehicle_camera.look_at(global_position + global_basis.z * 2.0 + Vector3.UP, Vector3.UP)
 
 func enter_vehicle(character: Node3D) -> void:
+	if driver != null or character == null:
+		return
 	driver = character
-	character.visible = false
-	character.set_physics_process(false)
+	if character.has_method("set_vehicle_hidden"):
+		character.set_vehicle_hidden(true)
+	else:
+		character.visible = false
+		character.set_physics_process(false)
 	vehicle_camera.current = true
-	character.global_position = global_position + Vector3.UP * 1.5
 
 func exit_vehicle() -> void:
 	if driver == null:
 		return
-	driver.global_position = global_position + global_basis.x * 2.0 + Vector3.UP
-	driver.visible = true
-	driver.set_physics_process(true)
+	var exit_position := global_position + global_basis.x * 2.2 + Vector3.UP * 0.8
+	driver.global_position = exit_position
+	if driver.has_method("set_vehicle_hidden"):
+		driver.set_vehicle_hidden(false)
+	else:
+		driver.visible = true
+		driver.set_physics_process(true)
 	var pivot := driver.get_node_or_null("CameraPivot/Camera3D") as Camera3D
 	if pivot != null:
 		pivot.current = true

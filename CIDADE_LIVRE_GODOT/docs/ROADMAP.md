@@ -32,3 +32,11 @@ Cada sistema precisa ser integrado à cena, executado no Godot e testado antes d
 - Interiores mobiliados com colisões, iluminação quente e entrada/saída pelo sistema de interação.
 - Colisões dos ambientes são alternadas ao entrar e sair para evitar paredes invisíveis bloqueando o jogador.
 - A validação automatizada confirma importação e inicialização headless; ainda falta teste de colisão e desempenho em Android real.
+
+
+## Marco comercial — distrito de serviços interativos
+- Três estabelecimentos posicionados em quarteirões reservados: Farmácia Central, Mercado Popular e Clínica Vida.
+- Fachadas com identidade visual, entradas acessíveis e interiores com balcão, prateleira e iluminação.
+- Interação por proximidade: primeira ação entra; segunda compra recuperação de saúde, com preço e quantidade próprios por loja.
+- Compra valida saldo, impede gasto quando a saúde já está cheia e atualiza o dinheiro e a barra de vida existentes.
+- A validação headless verifica importação e inicialização; ainda falta teste manual de navegação, colisões e compra no Android.

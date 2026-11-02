@@ -97,7 +97,8 @@ func _spawn_houses() -> void:
 		var house := Node3D.new()
 		house.set_script(HOUSE_SCRIPT)
 		house.name = "ResidentialHouse_%02d" % houses.size()
-		house.position = Vector3(cell.x * 20.0 + 4.5, 0.0, cell.y * 20.0 + 4.5)
+		# Center each home inside its block, clear of the surrounding road lanes.
+		house.position = Vector3(cell.x * 20.0 + 10.0, 0.0, cell.y * 20.0 + 10.0)
 		add_child(house)
 		houses.append(house)
 

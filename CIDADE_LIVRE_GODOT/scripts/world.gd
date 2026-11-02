@@ -22,6 +22,7 @@ var current_vehicle: VehicleBody3D
 var traffic_cars: Array[VehicleBody3D] = []
 var sun_light: DirectionalLight3D
 var day_clock := 0.25
+var police_officer: CharacterBody3D
 
 func _ready() -> void:
 	_build_environment()
@@ -171,6 +172,7 @@ func _spawn_police() -> void:
 	officer.position = Vector3(-18, 1, -12)
 	officer.name = "PoliceOfficer"
 	officer.target = player
+	police_officer = officer
 	add_child(officer)
 
 func _build_hud() -> void:
@@ -206,7 +208,8 @@ func _setup_game_systems() -> void:
 		if saved_position.size() == 3:
 			player.global_position = Vector3(float(saved_position[0]), float(saved_position[1]), float(saved_position[2]))
 		money = int(saved.get("money", money))
-		wanted_level = int(saved.get("wanted_level", wanted_level))
+		wanted_level = clampi(int(saved.get("wanted_level", wanted_level)), 0, 5)
+		mission_manager.restore_mission(str(saved.get("mission_id", "first_steps")))
 	mission_manager.start_current()
 	mission_label.text = "MISSÃO: " + mission_manager.get_current_description()
 
@@ -230,6 +233,8 @@ func _process(delta: float) -> void:
 	if sun_light != null:
 		sun_light.rotation_degrees.x = lerpf(-15.0, -165.0, day_clock)
 		sun_light.light_energy = lerpf(0.25, 1.1, clampf(sin(day_clock * PI), 0.0, 1.0))
+	if police_officer != null:
+		police_officer.wanted_level = wanted_level
 	if player != null and mission_manager != null:
 		mission_manager.update_player_position(player.global_position)
 	save_timer += delta

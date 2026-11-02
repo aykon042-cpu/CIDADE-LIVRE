@@ -4,7 +4,7 @@ class_name CitySaveManager
 const SAVE_PATH := "user://cidade_livre_save.json"
 const SAVE_VERSION := 1
 
-static func save_game(player: Node3D, money: int, wanted_level: int, mission_id: String) -> bool:
+static func save_game(player: Node3D, money: int, wanted_level: int, mission_id: String, vehicle: Node3D = null) -> bool:
 	if player == null:
 		return false
 	var payload := {
@@ -15,6 +15,8 @@ static func save_game(player: Node3D, money: int, wanted_level: int, mission_id:
 		"mission_id": mission_id,
 		"saved_at_unix": Time.get_unix_time_from_system()
 	}
+	if vehicle != null and is_instance_valid(vehicle):
+		payload["vehicle_position"] = [vehicle.global_position.x, vehicle.global_position.y, vehicle.global_position.z]
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
 		push_error("Não foi possível abrir o arquivo de save: %s" % FileAccess.get_open_error())

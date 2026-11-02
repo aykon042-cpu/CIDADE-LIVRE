@@ -13,7 +13,6 @@ func _build_exterior() -> void:
 	exterior_root = Node3D.new()
 	exterior_root.name = "Exterior"
 	add_child(exterior_root)
-	_box(exterior_root, Vector3(0, 1.5, 0), Vector3(7, 3, 6), Color(0.72, 0.62, 0.48), true, "Facade")
 	_box(exterior_root, Vector3(0, 3.25, 0), Vector3(7.5, 0.5, 6.5), Color(0.28, 0.16, 0.12), false, "Roof")
 	_box(exterior_root, Vector3(0, 1.0, -3.06), Vector3(7, 2, 0.18), Color(0.66, 0.55, 0.43), true, "RearWall")
 	_box(exterior_root, Vector3(-3.56, 1.5, 0), Vector3(0.18, 3, 6), Color(0.66, 0.55, 0.43), true, "LeftWall")

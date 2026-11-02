@@ -7,7 +7,7 @@ Open this folder in Godot 4.3 or newer. The project targets the Compatibility re
 
 ## Included prototype systems
 - Procedural blockout city with roads, buildings and a central park
-- Third-person character movement, sprint, jump and mouse camera
+- Third-person character movement, sprint, jump, mouse camera and touch-drag camera on Android
 - Placeholder vehicle body and basic driver control hooks
 - Civilian wandering AI
 - Basic police pursuit behavior
@@ -20,4 +20,6 @@ This is an early playable foundation, not a GTA IV equivalent. Vehicle entry/exi
 - WASD: move
 - Shift: sprint / vehicle brake
 - Space: jump
-- Mouse: camera
+- Mouse: camera (desktop)
+- Drag on the upper/right screen area: camera (Android)
+- Touch buttons: move, run, jump and interact (Android)

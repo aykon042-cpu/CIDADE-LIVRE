@@ -1,0 +1,33 @@
+name: Build CIDADE LIVRE Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "CIDADE_LIVRE_GODOT/**"
+      - ".github/workflows/android-apk.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3.0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Create build folder
+        run: mkdir -p build
+      - name: Import project resources
+        run: godot --headless --editor --path CIDADE_LIVRE_GODOT --quit
+      - name: Export Android APK (debug)
+        run: godot --headless --path CIDADE_LIVRE_GODOT --export-debug "Android" build/CIDADE-LIVRE-debug.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CIDADE-LIVRE-Android-APK
+          path: build/CIDADE-LIVRE-debug.apk
+          if-no-files-found: error
+          retention-days: 14

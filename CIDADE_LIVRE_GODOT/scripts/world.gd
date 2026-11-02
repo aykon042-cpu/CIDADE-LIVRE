@@ -235,8 +235,11 @@ func _process(delta: float) -> void:
 		sun_light.light_energy = lerpf(0.25, 1.1, clampf(sin(day_clock * PI), 0.0, 1.0))
 	if police_officer != null:
 		police_officer.wanted_level = wanted_level
-	if player != null and mission_manager != null:
-		mission_manager.update_player_position(player.global_position)
+	if mission_manager != null:
+		var mission_position := player.global_position if player != null else Vector3.ZERO
+		if current_vehicle != null:
+			mission_position = current_vehicle.global_position
+		mission_manager.update_player_position(mission_position)
 	save_timer += delta
 	if save_timer >= 30.0:
 		save_timer = 0.0

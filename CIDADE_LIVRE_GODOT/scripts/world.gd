@@ -93,10 +93,95 @@ func _build_city() -> void:
 			var w := randf_range(7.0, 12.0)
 			var d := randf_range(7.0, 12.0)
 			var pos := Vector3(x * 20.0 + randf_range(-3, 3), h / 2.0, z * 20.0 + randf_range(-3, 3))
-			_add_box(pos, Vector3(w, h, d), Color(randf_range(0.25, 0.65), randf_range(0.25, 0.65), randf_range(0.28, 0.7)), "Building")
+			var building_color := Color(randf_range(0.25, 0.65), randf_range(0.25, 0.65), randf_range(0.28, 0.7))
+			_add_box(pos, Vector3(w, h, d), building_color, "Building")
+			_decorate_building(pos, Vector3(w, h, d), building_color)
 	_add_box(Vector3(0, 0.08, 0), Vector3(18, 0.12, 18), Color(0.15, 0.38, 0.18), "CentralPark")
+	_build_street_details()
+	_build_park_details()
 	_spawn_houses()
 	_spawn_shops()
+
+func _add_visual_box(pos: Vector3, size: Vector3, color: Color, parent: Node = null) -> MeshInstance3D:
+	var visual := MeshInstance3D.new()
+	var box_mesh := BoxMesh.new()
+	box_mesh.size = size
+	visual.mesh = box_mesh
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	visual.material_override = material
+	if parent == null:
+		add_child(visual)
+	else:
+		parent.add_child(visual)
+	visual.position = pos
+	return visual
+
+func _decorate_building(center: Vector3, dimensions: Vector3, base_color: Color) -> void:
+	var glass := Color(0.12, 0.22, 0.30)
+	var trim := base_color.lightened(0.22)
+	var floors := maxi(1, int(dimensions.y / 3.2))
+	var columns := maxi(2, int(dimensions.x / 2.2))
+	for floor_index in range(floors):
+		for column_index in range(columns):
+			var wx := -dimensions.x * 0.5 + 1.0 + column_index * (dimensions.x - 2.0) / maxi(1, columns - 1)
+			var wy := 1.8 + floor_index * 3.0
+			if wy > dimensions.y - 0.5:
+				continue
+			_add_visual_box(center + Vector3(wx, wy, -dimensions.z * 0.5 - 0.025), Vector3(0.75, 1.05, 0.06), glass)
+			_add_visual_box(center + Vector3(wx, wy, dimensions.z * 0.5 + 0.025), Vector3(0.75, 1.05, 0.06), glass)
+		for side in [-1.0, 1.0]:
+			for column_index in range(maxi(2, int(dimensions.z / 2.2))):
+				var wz := -dimensions.z * 0.5 + 1.0 + column_index * (dimensions.z - 2.0) / maxi(1, int(dimensions.z / 2.2) - 1)
+				_add_visual_box(center + Vector3(side * (dimensions.x * 0.5 + 0.025), wy, wz), Vector3(0.06, 1.05, 0.75), glass)
+	_add_visual_box(center + Vector3(0, dimensions.y + 0.08, 0), Vector3(dimensions.x + 0.25, 0.16, dimensions.z + 0.25), trim)
+
+func _build_street_details() -> void:
+	var sidewalk := Color(0.42, 0.43, 0.41)
+	var lane := Color(0.88, 0.76, 0.35)
+	var white := Color(0.88, 0.89, 0.84)
+	for road_index in range(-4, 5):
+		var road_pos := float(road_index) * 20.0
+		for side in [-1.0, 1.0]:
+			_add_visual_box(Vector3(road_pos + side * 5.2, 0.10, 0), Vector3(2.4, 0.18, 180), sidewalk)
+			_add_visual_box(Vector3(0, 0.11, road_pos + side * 5.2), Vector3(180, 0.18, 2.4), sidewalk)
+		for mark in range(-8, 9):
+			if mark == 0:
+				continue
+			_add_visual_box(Vector3(road_pos, 0.055, mark * 10.0), Vector3(0.12, 0.025, 3.2), lane)
+			_add_visual_box(Vector3(mark * 10.0, 0.06, road_pos), Vector3(3.2, 0.025, 0.12), white)
+	for crossing in [-20.0, 0.0, 20.0, 40.0]:
+		for stripe in range(6):
+			_add_visual_box(Vector3(crossing - 3.0 + stripe * 1.2, 0.075, 4.8), Vector3(0.72, 0.035, 2.6), white)
+			_add_visual_box(Vector3(4.8, 0.075, crossing - 3.0 + stripe * 1.2), Vector3(2.6, 0.035, 0.72), white)
+	for road_index in range(-4, 5):
+		for side in [-1.0, 1.0]:
+			var lamp_x := road_index * 20.0 + side * 6.7
+			for z_pos in [-32.0, 32.0]:
+				_add_visual_box(Vector3(lamp_x, 2.0, z_pos), Vector3(0.16, 4.0, 0.16), Color(0.16, 0.17, 0.18))
+				_add_visual_box(Vector3(lamp_x, 4.0, z_pos), Vector3(0.8, 0.12, 0.8), Color(1.0, 0.82, 0.48))
+
+func _build_park_details() -> void:
+	var grass := Color(0.20, 0.46, 0.22)
+	var path := Color(0.63, 0.59, 0.48)
+	_add_visual_box(Vector3(0, 0.17, 0), Vector3(5.0, 0.06, 18.0), path)
+	_add_visual_box(Vector3(0, 0.18, 0), Vector3(18.0, 0.06, 5.0), path)
+	for tree_pos in [Vector3(-6, 0, -6), Vector3(6, 0, -6), Vector3(-6, 0, 6), Vector3(6, 0, 6), Vector3(-7, 0, 0), Vector3(7, 0, 0)]:
+		_add_visual_box(tree_pos + Vector3(0, 1.4, 0), Vector3(0.45, 2.8, 0.45), Color(0.28, 0.16, 0.08))
+		var crown := MeshInstance3D.new()
+		var crown_mesh := SphereMesh.new()
+		crown_mesh.radius = 1.45
+		crown_mesh.height = 2.8
+		crown.mesh = crown_mesh
+		var crown_mat := StandardMaterial3D.new()
+		crown_mat.albedo_color = grass.lightened(randf_range(0.0, 0.18))
+		crown.material_override = crown_mat
+		crown.position = tree_pos + Vector3(0, 3.0, 0)
+		add_child(crown)
+	for bench_x in [-3.5, 3.5]:
+		_add_visual_box(Vector3(bench_x, 0.65, 0), Vector3(2.0, 0.16, 0.65), Color(0.36, 0.20, 0.10))
+		_add_visual_box(Vector3(bench_x, 0.38, -0.2), Vector3(0.16, 0.55, 0.16), Color(0.12, 0.12, 0.12))
+		_add_visual_box(Vector3(bench_x, 0.38, 0.2), Vector3(0.16, 0.55, 0.16), Color(0.12, 0.12, 0.12))
 
 func _spawn_houses() -> void:
 	for cell in [Vector2i(-2, -2), Vector2i(-2, 2), Vector2i(2, -2), Vector2i(2, 2), Vector2i(-3, 0), Vector2i(3, 0)]:

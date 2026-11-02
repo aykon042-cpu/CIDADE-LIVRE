@@ -23,6 +23,9 @@ var traffic_cars: Array[VehicleBody3D] = []
 var sun_light: DirectionalLight3D
 var day_clock := 0.25
 var police_officer: CharacterBody3D
+var health_bar: ProgressBar
+var mission_marker: MeshInstance3D
+var marker_material: StandardMaterial3D
 
 func _ready() -> void:
 	_build_environment()
@@ -187,6 +190,11 @@ func _build_hud() -> void:
 	hud_label = Label.new()
 	hud_label.add_theme_font_size_override("font_size", 18)
 	column.add_child(hud_label)
+	health_bar = ProgressBar.new()
+	health_bar.max_value = 100.0
+	health_bar.value = 100.0
+	health_bar.custom_minimum_size = Vector2(230, 14)
+	column.add_child(health_bar)
 	mission_label = Label.new()
 	mission_label.text = "MISSÃO: Explore a cidade e encontre o marcador."
 	column.add_child(mission_label)
@@ -211,10 +219,13 @@ func _setup_game_systems() -> void:
 		wanted_level = clampi(int(saved.get("wanted_level", wanted_level)), 0, 5)
 		mission_manager.restore_mission(str(saved.get("mission_id", "first_steps")))
 	mission_manager.start_current()
+	_build_mission_marker()
+	_update_mission_marker()
 	mission_label.text = "MISSÃO: " + mission_manager.get_current_description()
 
 func _on_mission_started(_mission_id: String, title: String) -> void:
 	mission_label.text = "MISSÃO: " + title
+	_update_mission_marker()
 
 func _on_mission_completed(_mission_id: String, reward: int) -> void:
 	money += reward
@@ -226,7 +237,8 @@ func _save_progress() -> void:
 	var mission_id := "completed"
 	if mission_manager != null and mission_manager.current_index < mission_manager.missions.size():
 		mission_id = str(mission_manager.missions[mission_manager.current_index].id)
-	SAVE_MANAGER_SCRIPT.save_game(player, money, wanted_level, mission_id)
+	var save_actor: Node3D = current_vehicle if current_vehicle != null else player
+	SAVE_MANAGER_SCRIPT.save_game(save_actor, money, wanted_level, mission_id)
 
 func _process(delta: float) -> void:
 	day_clock = fposmod(day_clock + delta / 900.0, 1.0)
@@ -235,6 +247,10 @@ func _process(delta: float) -> void:
 		sun_light.light_energy = lerpf(0.25, 1.1, clampf(sin(day_clock * PI), 0.0, 1.0))
 	if police_officer != null:
 		police_officer.wanted_level = wanted_level
+	if player != null and health_bar != null:
+		health_bar.value = player.health
+	if mission_marker != null:
+		mission_marker.rotate_y(delta * 0.8)
 	if mission_manager != null:
 		var mission_position := player.global_position if player != null else Vector3.ZERO
 		if current_vehicle != null:
@@ -244,6 +260,31 @@ func _process(delta: float) -> void:
 	if save_timer >= 30.0:
 		save_timer = 0.0
 		_save_progress()
+
+func _build_mission_marker() -> void:
+	mission_marker = MeshInstance3D.new()
+	mission_marker.name = "MissionWaypoint"
+	var ring := TorusMesh.new()
+	ring.inner_radius = 1.4
+	ring.outer_radius = 1.8
+	mission_marker.mesh = ring
+	mission_marker.position.y = 0.25
+	marker_material = StandardMaterial3D.new()
+	marker_material.albedo_color = Color(1.0, 0.78, 0.12)
+	marker_material.emission_enabled = true
+	marker_material.emission = Color(1.0, 0.55, 0.05)
+	mission_marker.material_override = marker_material
+	add_child(mission_marker)
+
+func _update_mission_marker() -> void:
+	if mission_marker == null or mission_manager == null:
+		return
+	if mission_manager.current_index >= mission_manager.missions.size():
+		mission_marker.visible = false
+		return
+	mission_marker.visible = true
+	var target: Vector3 = mission_manager.get_current_target()
+	mission_marker.global_position = target + Vector3.UP * 0.3
 
 func _exit_tree() -> void:
 	_save_progress()

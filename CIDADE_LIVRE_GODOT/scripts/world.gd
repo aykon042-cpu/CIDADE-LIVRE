@@ -8,6 +8,7 @@ const MOBILE_CONTROLS_SCRIPT = preload("res://scripts/mobile_controls.gd")
 const MISSION_MANAGER_SCRIPT = preload("res://scripts/mission_manager.gd")
 const SAVE_MANAGER_SCRIPT = preload("res://scripts/save_manager.gd")
 const TRAFFIC_SCRIPT = preload("res://scripts/traffic_vehicle.gd")
+const HOUSE_SCRIPT = preload("res://scripts/residential_house.gd")
 var player: CharacterBody3D
 var wanted_level := 0
 var money := 250
@@ -26,6 +27,7 @@ var police_officer: CharacterBody3D
 var health_bar: ProgressBar
 var mission_marker: MeshInstance3D
 var marker_material: StandardMaterial3D
+var houses: Array[Node3D] = []
 
 func _ready() -> void:
 	_build_environment()
@@ -80,12 +82,24 @@ func _build_city() -> void:
 		for z in range(-4, 5):
 			if abs(x) < 2 and abs(z) < 2:
 				continue
+			if Vector2i(x, z) in [Vector2i(-2, -2), Vector2i(-2, 2), Vector2i(2, -2), Vector2i(2, 2), Vector2i(-3, 0), Vector2i(3, 0)]:
+				continue
 			var h := randf_range(7.0, 24.0)
 			var w := randf_range(7.0, 12.0)
 			var d := randf_range(7.0, 12.0)
 			var pos := Vector3(x * 20.0 + randf_range(-3, 3), h / 2.0, z * 20.0 + randf_range(-3, 3))
 			_add_box(pos, Vector3(w, h, d), Color(randf_range(0.25, 0.65), randf_range(0.25, 0.65), randf_range(0.28, 0.7)), "Building")
 	_add_box(Vector3(0, 0.08, 0), Vector3(18, 0.12, 18), Color(0.15, 0.38, 0.18), "CentralPark")
+	_spawn_houses()
+
+func _spawn_houses() -> void:
+	for cell in [Vector2i(-2, -2), Vector2i(-2, 2), Vector2i(2, -2), Vector2i(2, 2), Vector2i(-3, 0), Vector2i(3, 0)]:
+		var house := Node3D.new()
+		house.set_script(HOUSE_SCRIPT)
+		house.name = "ResidentialHouse_%02d" % houses.size()
+		house.position = Vector3(cell.x * 20.0 + 4.5, 0.0, cell.y * 20.0 + 4.5)
+		add_child(house)
+		houses.append(house)
 
 func _add_box(pos: Vector3, size: Vector3, color: Color, node_name: String) -> void:
 	var body := StaticBody3D.new()
@@ -168,6 +182,18 @@ func _unhandled_input(event: InputEvent) -> void:
 		if starter_vehicle.has_method("enter_vehicle"):
 			starter_vehicle.enter_vehicle(player)
 			current_vehicle = starter_vehicle
+		return
+	var nearest_house: Node3D
+	var nearest_distance := 4.0
+	for house in houses:
+		if not is_instance_valid(house):
+			continue
+		var distance := player.global_position.distance_to(house.global_position)
+		if distance <= nearest_distance:
+			nearest_distance = distance
+			nearest_house = house
+	if nearest_house != null and nearest_house.has_method("interact"):
+		nearest_house.interact(player)
 
 func _spawn_police() -> void:
 	var officer := CharacterBody3D.new()

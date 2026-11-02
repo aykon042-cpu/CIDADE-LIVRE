@@ -7,6 +7,8 @@
 - Workflow de validação headless.
 
 ## Sistemas adicionados nesta etapa
+- Câmera por arrasto na tela para Android, mantendo a área esquerda para movimento e o canto inferior direito para ações.
+- Sensibilidade de câmera touch configurável separadamente da sensibilidade do mouse.
 - Controles touch sintetizando ações do InputMap.
 - Gerenciador de save JSON versionado.
 - Gerenciador de missões com sinalização e recompensas.

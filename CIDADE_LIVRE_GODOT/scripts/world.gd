@@ -215,6 +215,9 @@ func _setup_game_systems() -> void:
 		var saved_position: Array = saved.get("player_position", [])
 		if saved_position.size() == 3:
 			player.global_position = Vector3(float(saved_position[0]), float(saved_position[1]), float(saved_position[2]))
+		var saved_vehicle_position: Array = saved.get("vehicle_position", [])
+		if saved_vehicle_position.size() == 3 and starter_vehicle != null:
+			starter_vehicle.global_position = Vector3(float(saved_vehicle_position[0]), float(saved_vehicle_position[1]), float(saved_vehicle_position[2]))
 		money = int(saved.get("money", money))
 		wanted_level = clampi(int(saved.get("wanted_level", wanted_level)), 0, 5)
 		mission_manager.restore_mission(str(saved.get("mission_id", "first_steps")))
@@ -237,8 +240,7 @@ func _save_progress() -> void:
 	var mission_id := "completed"
 	if mission_manager != null and mission_manager.current_index < mission_manager.missions.size():
 		mission_id = str(mission_manager.missions[mission_manager.current_index].id)
-	var save_actor: Node3D = current_vehicle if current_vehicle != null else player
-	SAVE_MANAGER_SCRIPT.save_game(save_actor, money, wanted_level, mission_id)
+	SAVE_MANAGER_SCRIPT.save_game(player, money, wanted_level, mission_id, current_vehicle)
 
 func _process(delta: float) -> void:
 	day_clock = fposmod(day_clock + delta / 900.0, 1.0)

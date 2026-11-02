@@ -40,3 +40,10 @@ Cada sistema precisa ser integrado à cena, executado no Godot e testado antes d
 - Interação por proximidade: primeira ação entra; segunda compra recuperação de saúde, com preço e quantidade próprios por loja.
 - Compra valida saldo, impede gasto quando a saúde já está cheia e atualiza o dinheiro e a barra de vida existentes.
 - A validação headless verifica importação e inicialização; ainda falta teste manual de navegação, colisões e compra no Android.
+
+
+## Marco de trânsito — semáforos funcionais
+- Três semáforos 3D com luzes vermelha, amarela e verde visíveis no cruzamento da avenida.
+- Ciclo temporizado: verde, amarelo e vermelho, com duração configurável por instância.
+- Veículos de tráfego recebem uma referência ao semáforo da sua faixa e freiam quando chegam à zona de parada durante o vermelho.
+- O sistema preserva os waypoints e a condução existentes; ainda requer teste visual e físico no Godot/Android para ajustar distâncias e frenagem.

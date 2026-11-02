@@ -3,7 +3,11 @@ class_name CityPolice
 
 @export var move_speed := 5.5
 @export var detection_radius := 24.0
+@export var search_radius := 42.0
 var target: Node3D
+var wanted_level := 0
+var last_known_position := Vector3.ZERO
+var search_time := 0.0
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 func _ready() -> void:
@@ -26,20 +30,32 @@ func _ready() -> void:
 	add_child(visual)
 
 func _physics_process(delta: float) -> void:
-	if target == null or not is_instance_valid(target):
+	if wanted_level <= 0 or target == null or not is_instance_valid(target):
+		velocity.x = move_toward(velocity.x, 0.0, move_speed * delta)
+		velocity.z = move_toward(velocity.z, 0.0, move_speed * delta)
+		if not is_on_floor():
+			velocity.y -= gravity * delta
+		move_and_slide()
 		return
 	var distance := global_position.distance_to(target.global_position)
-	if distance > detection_radius:
-		return
-	var direction := target.global_position - global_position
-	direction.y = 0
+	if distance <= detection_radius:
+		last_known_position = target.global_position
+		search_time = 0.0
+	elif distance > search_radius:
+		search_time += delta
+		if search_time > 12.0:
+			wanted_level = 0
+			return
+	var direction := last_known_position - global_position
+	direction.y = 0.0
 	if direction.length() > 1.5:
-		velocity.x = direction.normalized().x * move_speed
-		velocity.z = direction.normalized().z * move_speed
-		look_at(Vector3(target.global_position.x, global_position.y, target.global_position.z))
+		var pursuit_speed := move_speed + float(maxi(wanted_level - 1, 0)) * 1.25
+		velocity.x = direction.normalized().x * pursuit_speed
+		velocity.z = direction.normalized().z * pursuit_speed
+		look_at(Vector3(last_known_position.x, global_position.y, last_known_position.z))
 	else:
-		velocity.x = 0
-		velocity.z = 0
+		velocity.x = 0.0
+		velocity.z = 0.0
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 	move_and_slide()

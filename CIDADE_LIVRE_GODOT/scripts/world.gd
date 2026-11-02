@@ -16,6 +16,8 @@ var mission_done := false
 var mission_manager: Node
 var mobile_controls: CanvasLayer
 var save_timer := 0.0
+var starter_vehicle: VehicleBody3D
+var current_vehicle: VehicleBody3D
 
 func _ready() -> void:
 	_build_environment()
@@ -114,7 +116,6 @@ func _spawn_vehicle() -> void:
 	car.set_script(VEHICLE_SCRIPT)
 	car.position = Vector3(5, 1, 10)
 	car.name = "StarterVehicle"
-	add_child(car)
 	for p in [Vector3(-0.8, 0.25, -1.1), Vector3(0.8, 0.25, -1.1), Vector3(-0.8, 0.25, 1.1), Vector3(0.8, 0.25, 1.1)]:
 		var wheel := VehicleWheel3D.new()
 		wheel.position = p
@@ -123,6 +124,21 @@ func _spawn_vehicle() -> void:
 		wheel.use_as_steering = absf(p.z) > 0.5 and p.z < 0
 		wheel.use_as_traction = true
 		car.add_child(wheel)
+	add_child(car)
+	starter_vehicle = car
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not event.is_action_pressed("interact"):
+		return
+	if current_vehicle != null:
+		if current_vehicle.has_method("exit_vehicle"):
+			current_vehicle.exit_vehicle()
+		current_vehicle = null
+		return
+	if starter_vehicle != null and player != null and player.global_position.distance_to(starter_vehicle.global_position) <= 4.0:
+		if starter_vehicle.has_method("enter_vehicle"):
+			starter_vehicle.enter_vehicle(player)
+			current_vehicle = starter_vehicle
 
 func _spawn_police() -> void:
 	var officer := CharacterBody3D.new()
@@ -148,7 +164,7 @@ func _build_hud() -> void:
 	mission_label.text = "MISSÃO: Explore a cidade e encontre o marcador."
 	column.add_child(mission_label)
 	var help := Label.new()
-	help.text = "WASD: mover | Shift: correr | Espaço: pular"
+	help.text = "WASD: mover | Shift: correr | Espaço: pular | E: entrar/sair do carro"
 	column.add_child(help)
 
 func _setup_game_systems() -> void:

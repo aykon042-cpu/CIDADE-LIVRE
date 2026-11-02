@@ -1,52 +1,34 @@
 # CIDADE LIVRE — Godot 4 foundation
 
-This folder is a new, additive Godot 4 project foundation. The original `CIDADE_LIVRE_V04.zip` at the repository root is intentionally untouched.
+This folder is an additive Godot 4 project. The original `CIDADE_LIVRE_V04.zip` at the repository root is intentionally preserved and untouched.
 
-## Open
-Open this folder in Godot 4.3 or newer. The project targets the Compatibility renderer for broader Android support.
+## Abrir o projeto
+Abra esta pasta no Godot 4.3. O projeto usa o renderizador Compatibility para ampliar a compatibilidade com Android.
 
-## Included prototype systems
-- Procedural blockout city with roads, buildings and a central park
-- Third-person character movement, sprint, jump, mouse camera and touch-drag camera on Android
-- Placeholder vehicle body and basic driver control hooks
-- Civilian wandering AI
-- Basic police pursuit behavior
-- HUD and a simple exploration/reward objective
+## Gerar APK pelo GitHub (sem computador)
+1. Abra a aba **Actions** deste repositório.
+2. Selecione **Build CIDADE LIVRE Android APK**.
+3. Toque em **Run workflow** e confirme em **Run workflow**.
+4. Aguarde o trabalho terminar com status verde.
+5. Abra a execução concluída e baixe o artefato **CIDADE-LIVRE-Android-APK**.
+6. Extraia o ZIP do artefato e instale o APK no Android.
 
-## Visual status and limitations
-The city is a procedural 3D prototype built from primitive meshes. The current visual pass adds building windows and roof trim, sidewalks, road markings, crosswalks, street lamps, park paths, trees and benches. These changes make the blockout read more like an urban environment while keeping the existing gameplay scripts and interactions.
+O APK gerado por esse fluxo é uma compilação de depuração (debug), não uma versão assinada para publicação na Play Store. O fluxo precisa concluir com sucesso; a validação do projeto não substitui testes em aparelho real.
 
-This is still not a photorealistic GTA-style production: the player and vehicles use placeholder geometry, buildings are procedural blocks, and there are no finished character models, detailed vehicle assets, authored textures, advanced lighting, or full animation/audio pipelines. No Android APK or device-performance claim is made until the project is opened, run and tested with Godot and Android export templates.
+## Sistemas incluídos no protótipo
+- Cidade procedural com ruas, prédios, calçadas, faixas e parque central.
+- Personagem em terceira pessoa, corrida, salto e câmera por toque.
+- Veículo dirigível com aceleração, esterçamento, freio de mão e câmera de perseguição.
+- Pedestres com rotas e reação à aproximação do jogador.
+- Tráfego com semáforos.
+- Polícia e perseguição básica.
+- HUD, dinheiro, saúde, objetivos, salvamento e estabelecimentos com interiores.
 
-## Controls
-- WASD: move
-- Shift: sprint / vehicle brake
-- Space: jump
-- Mouse: camera (desktop)
-- Drag on the upper/right screen area: camera (Android)
-- Touch buttons: move, run, jump and interact (Android)
+## Controles
+- WASD: andar; Shift: correr/frear; Espaço: pular.
+- Mouse: câmera no computador.
+- Arrastar na região superior/direita: câmera no Android.
+- Botões de toque: movimentação, corrida, pulo e interação.
 
-
-## Distrito comercial (novo)
-- Farmácia Central, Mercado Popular e Clínica Vida com interiores acessíveis.
-- Use **E** perto de uma loja para entrar e novamente para comprar recuperação de saúde. Cada estabelecimento tem preço e recuperação diferentes; o saldo é validado antes da compra.
-- A base continua sendo um protótipo Godot: a validação automatizada não substitui testes de gameplay em Android.
-
-
-## Trânsito com semáforos
-- A avenida agora tem três semáforos 3D com ciclo automático de verde, amarelo e vermelho.
-- Os carros de tráfego associados à faixa reduzem e param antes do cruzamento durante o vermelho; a rota por waypoints continua ativa.
-
-
-## Pedestres com rotas
-- Doze pedestres circulam por três trajetos ao redor da área central, fazem pausas e retomam seus percursos.
-- Ao se aproximar, o jogador assusta os pedestres; eles fogem e depois voltam para o trecho mais próximo da rota.
-
-## Jogabilidade — atualização de movimentação e direção
-- Movimento a pé relativo à câmera, aceleração e desaceleração mais suaves, controle aéreo e corrida com barra de resistência que se recupera.
-- Câmera de terceira pessoa com sensibilidade ajustada para mouse e arrasto na tela.
-- Direção com aceleração, esterçamento progressivo, freio de mão e câmera de perseguição que afasta conforme a velocidade.
-- Ao entrar no veículo, a colisão do personagem é desativada; ao sair, é reativada para evitar que o jogador fique preso no carro.
-- Os controles existentes de teclado e toque continuam usando as mesmas ações.
-
-Ainda é uma base de jogabilidade em evolução: não inclui combate completo, sistema de cobertura, animações finais, troca de personagens ou física de veículos de produção.
+## Estado visual e limites
+O jogo ainda é um protótipo 3D low-poly com geometrias provisórias. Ainda faltam modelos finais, animações completas, áudio, combate completo, cobertura e testes extensivos de desempenho em dispositivos Android. Nenhuma imagem conceitual deve ser tratada como captura real do jogo.

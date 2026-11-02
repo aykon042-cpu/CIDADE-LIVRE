@@ -8,6 +8,8 @@ var waypoints: Array[Vector3] = []
 var waypoint_index := 0
 var stopped := false
 var traffic_color := Color(0.18, 0.32, 0.62)
+var traffic_signal: Node3D
+var signal_stop_distance := 13.0
 
 func _ready() -> void:
 	mass = 1050.0
@@ -41,6 +43,12 @@ func _physics_process(_delta: float) -> void:
 		engine_force = 0.0
 		brake = 12.0
 		return
+	if traffic_signal != null and is_instance_valid(traffic_signal):
+		var distance_to_signal := global_position.distance_to(traffic_signal.global_position)
+		if distance_to_signal <= signal_stop_distance and traffic_signal.is_red_for_vehicle(global_position, linear_velocity):
+			engine_force = 0.0
+			brake = 18.0
+			return
 	var target := waypoints[waypoint_index]
 	var local_target := global_transform.affine_inverse() * target
 	if global_position.distance_to(target) <= waypoint_reach:

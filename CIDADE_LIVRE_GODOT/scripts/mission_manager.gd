@@ -36,8 +36,8 @@ func update_player_position(position: Vector3) -> void:
 	var mission: Dictionary = missions[current_index]
 	if position.distance_to(mission.target) <= float(mission.radius):
 		active = false
-		mission_completed.emit(str(mission.id), int(mission.reward))
 		current_index += 1
+		mission_completed.emit(str(mission.id), int(mission.reward))
 		if current_index < missions.size():
 			start_current()
 

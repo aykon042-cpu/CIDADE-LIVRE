@@ -5,6 +5,7 @@ class_name CityPlayer
 @export var sprint_speed := 8.0
 @export var jump_velocity := 4.5
 @export var mouse_sensitivity := 0.002
+@export var touch_sensitivity := 0.004
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var camera_pivot: Node3D
 var camera: Camera3D
@@ -45,11 +46,19 @@ func _build_body() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		camera_pivot.rotate_y(-event.relative.x * mouse_sensitivity)
-		camera.rotate_x(-event.relative.y * mouse_sensitivity)
-		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-55), deg_to_rad(35))
+		_rotate_camera(event.relative, mouse_sensitivity)
+	elif event is InputEventScreenDrag and OS.has_feature("mobile"):
+		var viewport_size := get_viewport().get_visible_rect().size
+		# Reserve the left half for movement and the lower-right corner for action buttons.
+		if event.position.x >= viewport_size.x * 0.45 and event.position.y <= viewport_size.y * 0.72:
+			_rotate_camera(event.relative, touch_sensitivity)
 	if event.is_action_pressed("ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+func _rotate_camera(relative_motion: Vector2, sensitivity: float) -> void:
+	camera_pivot.rotate_y(-relative_motion.x * sensitivity)
+	camera.rotate_x(-relative_motion.y * sensitivity)
+	camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-55), deg_to_rad(35))
 
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():

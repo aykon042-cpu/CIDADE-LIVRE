@@ -12,6 +12,17 @@ var missions: Array[Dictionary] = [
 var current_index := 0
 var active := false
 
+func restore_mission(mission_id: String) -> void:
+	if mission_id == "completed":
+		current_index = missions.size()
+		active = false
+		return
+	for index in range(missions.size()):
+		if str(missions[index].id) == mission_id:
+			current_index = index
+			active = false
+			return
+
 func start_current() -> void:
 	if current_index >= missions.size():
 		return

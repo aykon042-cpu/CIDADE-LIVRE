@@ -25,3 +25,10 @@
 
 ## Critério de qualidade
 Cada sistema precisa ser integrado à cena, executado no Godot e testado antes de ser marcado como concluído. A existência de um script isolado não significa que a funcionalidade esteja pronta.
+
+## Marco residencial — seis casas com identidade própria
+- Seis casas posicionadas dentro dos quarteirões, fora das faixas de tráfego.
+- Cada casa recebe uma paleta própria para fachada, telhado, paredes internas, piso e mobiliário.
+- Interiores mobiliados com colisões, iluminação quente e entrada/saída pelo sistema de interação.
+- Colisões dos ambientes são alternadas ao entrar e sair para evitar paredes invisíveis bloqueando o jogador.
+- A validação automatizada confirma importação e inicialização headless; ainda falta teste de colisão e desempenho em Android real.

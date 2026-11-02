@@ -4,12 +4,18 @@ const PLAYER_SCRIPT = preload("res://scripts/player.gd")
 const POLICE_SCRIPT = preload("res://scripts/police.gd")
 const CIVILIAN_SCRIPT = preload("res://scripts/civilian.gd")
 const VEHICLE_SCRIPT = preload("res://scripts/vehicle.gd")
+const MOBILE_CONTROLS_SCRIPT = preload("res://scripts/mobile_controls.gd")
+const MISSION_MANAGER_SCRIPT = preload("res://scripts/mission_manager.gd")
+const SAVE_MANAGER_SCRIPT = preload("res://scripts/save_manager.gd")
 var player: CharacterBody3D
 var wanted_level := 0
 var money := 250
 var hud_label: Label
 var mission_label: Label
 var mission_done := false
+var mission_manager: Node
+var mobile_controls: CanvasLayer
+var save_timer := 0.0
 
 func _ready() -> void:
 	_build_environment()
@@ -19,6 +25,7 @@ func _ready() -> void:
 	_spawn_population()
 	_spawn_vehicle()
 	_spawn_police()
+	_setup_game_systems()
 	_update_hud()
 
 func _build_environment() -> void:
@@ -144,12 +151,49 @@ func _build_hud() -> void:
 	help.text = "WASD: mover | Shift: correr | Espaço: pular"
 	column.add_child(help)
 
-func _process(_delta: float) -> void:
-	if not mission_done and player != null and player.global_position.distance_to(Vector3(0, 0, -24)) < 3.0:
-		mission_done = true
-		money += 500
-		mission_label.text = "MISSÃO CONCLUÍDA! +$500"
-		_update_hud()
+func _setup_game_systems() -> void:
+	mobile_controls = MOBILE_CONTROLS_SCRIPT.new()
+	add_child(mobile_controls)
+	mission_manager = MISSION_MANAGER_SCRIPT.new()
+	mission_manager.name = "MissionManager"
+	add_child(mission_manager)
+	mission_manager.mission_started.connect(_on_mission_started)
+	mission_manager.mission_completed.connect(_on_mission_completed)
+	var saved: Dictionary = SAVE_MANAGER_SCRIPT.load_game()
+	if not saved.is_empty():
+		var saved_position: Array = saved.get("player_position", [])
+		if saved_position.size() == 3:
+			player.global_position = Vector3(float(saved_position[0]), float(saved_position[1]), float(saved_position[2]))
+		money = int(saved.get("money", money))
+		wanted_level = int(saved.get("wanted_level", wanted_level))
+	mission_manager.start_current()
+	mission_label.text = "MISSÃO: " + mission_manager.get_current_description()
+
+func _on_mission_started(_mission_id: String, title: String) -> void:
+	mission_label.text = "MISSÃO: " + title
+
+func _on_mission_completed(_mission_id: String, reward: int) -> void:
+	money += reward
+	mission_label.text = "MISSÃO CONCLUÍDA! +$%d" % reward
+	_update_hud()
+	_save_progress()
+
+func _save_progress() -> void:
+	var mission_id := "completed"
+	if mission_manager != null and mission_manager.current_index < mission_manager.missions.size():
+		mission_id = str(mission_manager.missions[mission_manager.current_index].id)
+	SAVE_MANAGER_SCRIPT.save_game(player, money, wanted_level, mission_id)
+
+func _process(delta: float) -> void:
+	if player != null and mission_manager != null:
+		mission_manager.update_player_position(player.global_position)
+	save_timer += delta
+	if save_timer >= 30.0:
+		save_timer = 0.0
+		_save_progress()
+
+func _exit_tree() -> void:
+	_save_progress()
 
 func _update_hud() -> void:
 	if hud_label:

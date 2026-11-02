@@ -240,7 +240,7 @@ func _save_progress() -> void:
 	var mission_id := "completed"
 	if mission_manager != null and mission_manager.current_index < mission_manager.missions.size():
 		mission_id = str(mission_manager.missions[mission_manager.current_index].id)
-	SAVE_MANAGER_SCRIPT.save_game(player, money, wanted_level, mission_id, current_vehicle)
+	SAVE_MANAGER_SCRIPT.save_game(player, money, wanted_level, mission_id, starter_vehicle)
 
 func _process(delta: float) -> void:
 	day_clock = fposmod(day_clock + delta / 900.0, 1.0)

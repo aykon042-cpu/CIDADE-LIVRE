@@ -13,8 +13,10 @@ Open this folder in Godot 4.3 or newer. The project targets the Compatibility re
 - Basic police pursuit behavior
 - HUD and a simple exploration/reward objective
 
-## Important limitations
-This is an early playable foundation, not a GTA IV equivalent. Vehicle entry/exit interaction, mobile touch controls, traffic navigation, mission progression, save/load, combat, animation, audio and production assets still need implementation. No Android APK or device performance claim is made until the project is opened, run and tested with the Godot editor and Android export templates.
+## Visual status and limitations
+The city is a procedural 3D prototype built from primitive meshes. The current visual pass adds building windows and roof trim, sidewalks, road markings, crosswalks, street lamps, park paths, trees and benches. These changes make the blockout read more like an urban environment while keeping the existing gameplay scripts and interactions.
+
+This is still not a photorealistic GTA-style production: the player and vehicles use placeholder geometry, buildings are procedural blocks, and there are no finished character models, detailed vehicle assets, authored textures, advanced lighting, or full animation/audio pipelines. No Android APK or device-performance claim is made until the project is opened, run and tested with Godot and Android export templates.
 
 ## Controls
 - WASD: move

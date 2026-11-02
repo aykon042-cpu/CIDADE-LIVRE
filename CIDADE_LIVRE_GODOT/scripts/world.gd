@@ -1,0 +1,156 @@
+extends Node3D
+
+const PLAYER_SCRIPT = preload("res://scripts/player.gd")
+const POLICE_SCRIPT = preload("res://scripts/police.gd")
+const CIVILIAN_SCRIPT = preload("res://scripts/civilian.gd")
+const VEHICLE_SCRIPT = preload("res://scripts/vehicle.gd")
+var player: CharacterBody3D
+var wanted_level := 0
+var money := 250
+var hud_label: Label
+var mission_label: Label
+var mission_done := false
+
+func _ready() -> void:
+	_build_environment()
+	_build_city()
+	_spawn_player()
+	_build_hud()
+	_spawn_population()
+	_spawn_vehicle()
+	_spawn_police()
+	_update_hud()
+
+func _build_environment() -> void:
+	var world_env := WorldEnvironment.new()
+	var env := Environment.new()
+	env.background_mode = Environment.BG_SKY
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.65, 0.72, 0.85)
+	env.ambient_light_energy = 0.7
+	world_env.environment = env
+	add_child(world_env)
+	var sun := DirectionalLight3D.new()
+	sun.rotation_degrees = Vector3(-48, -30, 0)
+	sun.light_energy = 1.1
+	add_child(sun)
+	var ground := StaticBody3D.new()
+	ground.name = "Ground"
+	var mesh := MeshInstance3D.new()
+	var plane := BoxMesh.new()
+	plane.size = Vector3(180, 1, 180)
+	mesh.mesh = plane
+	mesh.position.y = -0.5
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(0.18, 0.24, 0.19)
+	mesh.material_override = mat
+	ground.add_child(mesh)
+	var col := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(180, 1, 180)
+	col.shape = box
+	col.position.y = -0.5
+	ground.add_child(col)
+	add_child(ground)
+
+func _build_city() -> void:
+	for i in range(-4, 5):
+		_add_box(Vector3(i * 20.0, 0.02, 0), Vector3(8, 0.04, 180), Color(0.12, 0.12, 0.13), "Road_NS")
+		_add_box(Vector3(0, 0.03, i * 20.0), Vector3(180, 0.04, 8), Color(0.12, 0.12, 0.13), "Road_EW")
+	for x in range(-4, 5):
+		for z in range(-4, 5):
+			if abs(x) < 2 and abs(z) < 2:
+				continue
+			var h := randf_range(7.0, 24.0)
+			var w := randf_range(7.0, 12.0)
+			var d := randf_range(7.0, 12.0)
+			var pos := Vector3(x * 20.0 + randf_range(-3, 3), h / 2.0, z * 20.0 + randf_range(-3, 3))
+			_add_box(pos, Vector3(w, h, d), Color(randf_range(0.25, 0.65), randf_range(0.25, 0.65), randf_range(0.28, 0.7)), "Building")
+	_add_box(Vector3(0, 0.08, 0), Vector3(18, 0.12, 18), Color(0.15, 0.38, 0.18), "CentralPark")
+
+func _add_box(pos: Vector3, size: Vector3, color: Color, node_name: String) -> void:
+	var body := StaticBody3D.new()
+	body.name = node_name
+	body.position = pos
+	var mesh_instance := MeshInstance3D.new()
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	mesh_instance.mesh = mesh
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	mesh_instance.material_override = material
+	body.add_child(mesh_instance)
+	var collision := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = size
+	collision.shape = shape
+	body.add_child(collision)
+	add_child(body)
+
+func _spawn_player() -> void:
+	player = CharacterBody3D.new()
+	player.set_script(PLAYER_SCRIPT)
+	player.name = "Player"
+	player.position = Vector3(0, 1, 13)
+	add_child(player)
+
+func _spawn_population() -> void:
+	for i in range(12):
+		var npc := CharacterBody3D.new()
+		npc.set_script(CIVILIAN_SCRIPT)
+		npc.position = Vector3(randf_range(-14, 14), 1, randf_range(-14, 14))
+		npc.name = "Civilian_%02d" % i
+		add_child(npc)
+
+func _spawn_vehicle() -> void:
+	var car := VehicleBody3D.new()
+	car.set_script(VEHICLE_SCRIPT)
+	car.position = Vector3(5, 1, 10)
+	car.name = "StarterVehicle"
+	add_child(car)
+	for p in [Vector3(-0.8, 0.25, -1.1), Vector3(0.8, 0.25, -1.1), Vector3(-0.8, 0.25, 1.1), Vector3(0.8, 0.25, 1.1)]:
+		var wheel := VehicleWheel3D.new()
+		wheel.position = p
+		wheel.wheel_radius = 0.35
+		wheel.wheel_rest_length = 0.2
+		wheel.use_as_steering = absf(p.z) > 0.5 and p.z < 0
+		wheel.use_as_traction = true
+		car.add_child(wheel)
+
+func _spawn_police() -> void:
+	var officer := CharacterBody3D.new()
+	officer.set_script(POLICE_SCRIPT)
+	officer.position = Vector3(-18, 1, -12)
+	officer.name = "PoliceOfficer"
+	officer.target = player
+	add_child(officer)
+
+func _build_hud() -> void:
+	var layer := CanvasLayer.new()
+	add_child(layer)
+	var panel := PanelContainer.new()
+	panel.position = Vector2(18, 18)
+	panel.custom_minimum_size = Vector2(270, 96)
+	layer.add_child(panel)
+	var column := VBoxContainer.new()
+	panel.add_child(column)
+	hud_label = Label.new()
+	hud_label.add_theme_font_size_override("font_size", 18)
+	column.add_child(hud_label)
+	mission_label = Label.new()
+	mission_label.text = "MISSÃO: Explore a cidade e encontre o marcador."
+	column.add_child(mission_label)
+	var help := Label.new()
+	help.text = "WASD: mover | Shift: correr | Espaço: pular"
+	column.add_child(help)
+
+func _process(_delta: float) -> void:
+	if not mission_done and player != null and player.global_position.distance_to(Vector3(0, 0, -24)) < 3.0:
+		mission_done = true
+		money += 500
+		mission_label.text = "MISSÃO CONCLUÍDA! +$500"
+		_update_hud()
+
+func _update_hud() -> void:
+	if hud_label:
+		hud_label.text = "CIDADE LIVRE\nDinheiro: $%d\nProcurado: %s" % [money, "★".repeat(wanted_level)]

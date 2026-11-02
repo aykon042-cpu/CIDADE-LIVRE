@@ -125,7 +125,7 @@ func _decorate_building(center: Vector3, dimensions: Vector3, base_color: Color)
 	for floor_index in range(floors):
 		for column_index in range(columns):
 			var wx := -dimensions.x * 0.5 + 1.0 + column_index * (dimensions.x - 2.0) / maxi(1, columns - 1)
-			var wy := 1.8 + floor_index * 3.0
+			var wy := -dimensions.y * 0.5 + 1.8 + floor_index * 3.0
 			if wy > dimensions.y - 0.5:
 				continue
 			_add_visual_box(center + Vector3(wx, wy, -dimensions.z * 0.5 - 0.025), Vector3(0.75, 1.05, 0.06), glass)
@@ -134,7 +134,7 @@ func _decorate_building(center: Vector3, dimensions: Vector3, base_color: Color)
 			for column_index in range(maxi(2, int(dimensions.z / 2.2))):
 				var wz := -dimensions.z * 0.5 + 1.0 + column_index * (dimensions.z - 2.0) / maxi(1, int(dimensions.z / 2.2) - 1)
 				_add_visual_box(center + Vector3(side * (dimensions.x * 0.5 + 0.025), wy, wz), Vector3(0.06, 1.05, 0.75), glass)
-	_add_visual_box(center + Vector3(0, dimensions.y + 0.08, 0), Vector3(dimensions.x + 0.25, 0.16, dimensions.z + 0.25), trim)
+	_add_visual_box(center + Vector3(0, dimensions.y * 0.5 + 0.08, 0), Vector3(dimensions.x + 0.25, 0.16, dimensions.z + 0.25), trim)
 
 func _build_street_details() -> void:
 	var sidewalk := Color(0.42, 0.43, 0.41)
